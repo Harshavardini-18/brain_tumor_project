@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    h2 { color: #333; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    td, th { padding: 8px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Brain Tumor Classification Report</h2>
+  <p><strong>Patient Name:</strong> {{ name }}</p>
+  <p><strong>Age:</strong> {{ age }}</p>
+  <p><strong>Gender:</strong> {{ gender }}</p>
+  <p><strong>Symptoms:</strong> {{ symptoms }}</p>
+  <p><strong>Prediction:</strong> {{ result }}</p>
+  <p><strong>Confidence:</strong> {{ confidence }}%</p>
+  <img src="{{ image_url }}" width="200" />
+</body>
+</html>

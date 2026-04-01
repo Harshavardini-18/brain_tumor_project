@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Patient Records</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: #fefefe;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #a0e9ff, #c3bef0);
+      height: 180px;
+      border-radius: 0 0 25px 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .container {
+      margin-top: -60px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      padding: 40px;
+      max-width: 96%;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header-row h2 {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .btn-logout {
+      background-color: #ff6b81;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba(255, 107, 129, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-logout:hover {
+      background-color: #ff4d6d;
+    }
+
+    .cute-text {
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    table {
+      margin-top: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: linear-gradient(120deg, #a0e9ff, #c3bef0);
+      color: #333;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+    }
+
+    th, td {
+      vertical-align: middle;
+      text-align: center;
+      padding: 12px;
+    }
+
+    td.symptoms-col {
+      text-align: left;
+      max-width: 280px;
+      white-space: normal;
+    }
+
+    img.thumb {
+      width: 90px;
+      border-radius: 10px;
+      border: 2px solid #eee;
+    }
+
+    .alert-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      font-weight: 500;
+      border-radius: 10px;
+    }
+
+    /* ✅ Badge Styling */
+    .badge {
+      font-size: 0.95rem;
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .banner {
+        font-size: 1.6rem;
+        height: 150px;
+      }
+
+      .header-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn-logout {
+        width: 100%;
+      }
+
+      img.thumb {
+        width: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="banner">
+    Doctor Admin Panel 🩺
+  </div>
+
+  <div class="container">
+    <div class="header-row">
+      <h2>Hello, Dr. {{ doctor }}</h2>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    </div>
+
+    <p class="cute-text">Here are your patients and their recent tumor classification results:</p>
+
+    {% if patients|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Symptoms</th>
+              <th>Tumor Type</th>
+              <th>Confidence (%)</th>
+              <th>MRI Scan</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in patients %}
+              <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td class="symptoms-col">{{ row[4] }}</td>
+
+                <!-- ✅ Tumor Type Color Badge -->
+                <td>
+                  {% set tumor = row[5]|lower %}
+                  {% if "glioma" in tumor %}
+                    <span class="badge bg-danger">Glioma</span>
+                  {% elif "meningioma" in tumor %}
+                    <span class="badge bg-warning text-dark">Meningioma</span>
+                  {% elif "pituitary" in tumor %}
+                    <span class="badge bg-primary">Pituitary</span>
+                  {% elif "notumor" in tumor or "no tumor" in tumor or "no tumour" in tumor %}
+                    <span class="badge bg-success">No Tumor</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ row[5] }}</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ row[6] }}</td>
+
+                <td>
+                  <img src="{{ url_for('uploaded_file', filename=row[7]) }}" alt="MRI" class="thumb">
+                </td>
+
+                <!-- ✅ Delete button -->
+                <td>
+                  <form action="{{ url_for('delete_record', row_id=loop.index0) }}" method="POST"
+                        onsubmit="return confirm('Are you sure you want to delete this patient record?');">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-warning text-center mt-4" role="alert">
+        No patient data available yet 🧑‍⚕️
+      </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>
